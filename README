@@ -1,6 +1,14 @@
 Sokoban
 =======
 
+46. Trójwymiarowa wersja gry: „Sokoban”.
+
+Dana jest plansza reprezentująca magazyn, w którym rozmieszczone są skrzynie.
+Gracz, który może jedynie popychać te skrzynie musi je umieścić w odpowiednich
+miejscach. Przykładową implementację gry. można zobaczyć pod niniejszym
+adresem: http://www.pimpernel.com/sokoban . Sposób przeniesienia w 3 wymiar
+pozostawiamy studentowi.
+
 Koncepcja:
 - plansze ładowane z pliku (format do uzgodnienia),
 - kamera skierowana na środek planszy, obracanie kamery myszką,
