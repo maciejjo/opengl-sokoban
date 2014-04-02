@@ -1,0 +1,26 @@
+Sokoban
+=======
+
+Koncepcja:
+- plansze ładowane z pliku (format do uzgodnienia),
+- kamera skierowana na środek planszy, obracanie kamery myszką,
+- przybliżanie/oddalanie na scrollu myszki,
+- plansze złożone z obiektów nieprzesuwalnych (mur) i przesuwalnych (skrzynie),
+- gracz steruje kulą czy kit tam czym która pcha skrzynie.
+
+TODO:
+- menu (GUI/CLI)
+- modele (z neta, blender),
+- ładowanie modeli (format OBJ),
+- plansze (wymyślić format),
+- ładowanie planszy,
+- sterowanie kulą,
+- sterowanie kamerą,
+- ...and many more
+
+Biblioteki:
+- OpenGL 2.1,
+- Freeglut3 (albo GLFW),
+- GLM,
+- SOIL
+
