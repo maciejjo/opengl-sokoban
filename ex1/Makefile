@@ -2,7 +2,7 @@ TARGET		= ex1
 CC				= gcc -c
 LINKER		= gcc
 CFLAGS		= -Wall -Wextra -pedantic -O2 -g -std=gnu99
-LFLAGS		= -lkazmath -lGLEW -lGL -lm -lglfw -lSOIL
+LFLAGS		= -lglfw -lSOIL -lGLEW -lGL -lkazmath
 
 
 SRCDIR		= src
