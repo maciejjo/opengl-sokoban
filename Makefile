@@ -2,7 +2,7 @@ TARGET		= sokoban
 CC				= gcc -c
 LINKER		= gcc
 CFLAGS		= -Wall -Wextra -pedantic -O2 -g -std=gnu99
-LFLAGS		= -lglut -lGLEW -lGL -lm
+LFLAGS		= -lkazmath -lglut -lGLEW -lGL -lm
 
 
 SRCDIR		= src

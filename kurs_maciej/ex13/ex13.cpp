@@ -56,7 +56,7 @@ render_scene()
 }
 
 static void
-init_glut_callbacks()
+/nit_glut_callbacks()
 {
   glutDisplayFunc(render_scene);
   glutIdleFunc(render_scene);
