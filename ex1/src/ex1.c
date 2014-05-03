@@ -8,6 +8,7 @@
 #include <GLFW/glfw3.h>
 #include <SOIL/SOIL.h>
 #include <kazmath/kazmath.h>
+#include <kazmath/vec4.h>
 
 // Zarządzanie shaderami
 #include "shader_utils.h"
@@ -152,6 +153,15 @@ int main()
     -1.0f, -1.0f, -0.5f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f,
 };
 
+  unsigned int level_layout[5][5] = {
+    { 1, 1, 1, 1, 1 },
+    { 1, 0, 1, 0, 1 },
+    { 1, 0, 0, 0, 1 },
+    { 1, 1, 0, 0, 1 },
+    { 1, 1, 1, 1, 1 },
+  };
+
+
   // Żeby pisać do bufora, trzeba go zbindować. Bindujemy do targetu GL_ARRAY_BUFFER
   glBindBuffer(GL_ARRAY_BUFFER, vbo);
   // Właściwy zapis danych na GPU. Tutaj nie używamy deskryptora bufora, tylko
@@ -248,30 +258,17 @@ int main()
 
   // Nie modyfikujemy współrzędnych modelu - więc do macierzy M
   // przypisujemy macierz jednostkową.
-  kmMat4 model;
-  kmMat4Identity(&model);
-  GLint uniModel = glGetUniformLocation(shader_program, "model");
-  // Zapis do shadera.
-  glUniformMatrix4fv(uniModel, 1, GL_FALSE, &model.mat[0]);
 
   // Funkcja LookAt tworzy za nas macierz V, trzeba tylko podać
   // współrzędne oka, punktu na który patrzymy, i wektor wyznaczający
   // górę.
-  kmMat4 view;
-  kmVec3 p_eye = { 5.2f, 1.2f, 2.2f };
-  kmVec3 p_ctr = { 0.0f, 0.0f, 0.0f };
-  kmVec3 p_up  = { 0.0f, 0.0f, 1.0f };
-  kmMat4LookAt(&view, &p_eye, &p_ctr, &p_up);
-  GLint uniView = glGetUniformLocation(shader_program, "view");
-  // Zapis do shadera.
-  glUniformMatrix4fv(uniView, 1, GL_FALSE, &view.mat[0]);
 
 
   // Funkcja PerspectiveProjection tworzy macierz P. Przyjmuje
   // kąt widzenia, aspect ratio, oraz położenie płaszczyzn
   // przycinania z_near i z_far.
   kmMat4 proj;
-  kmMat4PerspectiveProjection(&proj, 45.0f, (float) WIN_WIDTH / (float) WIN_HEIGHT, 1.0f, 10.0f);
+  kmMat4PerspectiveProjection(&proj, 45.0f, (float) WIN_WIDTH / (float) WIN_HEIGHT, 1.0f, 100.0f);
   GLint uniProj = glGetUniformLocation(shader_program, "proj");
   // Zapis do shadera.
   glUniformMatrix4fv(uniProj, 1, GL_FALSE, &proj.mat[0]);
@@ -280,16 +277,39 @@ int main()
   // Ustawienie koloru czyszczenia ekranu
   glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
 
+    kmVec3 p_eye = { 8.0f, 3.0f, 8.0f };
+    kmVec3 p_ctr = { 3.0f, 0.0f, 3.0f };
+    kmVec3 p_up  = { 0.0f, 1.0f, 0.0f };
+
   // Pętla programu
   while(!glfwWindowShouldClose(window)) {
 
     // Czyścimy ekran na zadany kolor
     glClear(GL_COLOR_BUFFER_BIT|GL_DEPTH_BUFFER_BIT);
 
-    // Rysujemy kostkę. Rysowanie odbywa się z obecnie zbindowanego bufora
-    // VBO. Był tylko jeden, więc z niego pochodzą wierzchołki. 0 to indeks
-    // pierwszego wierzchołka, 36 to liczba wierzchołków (36 trójkątów w kostce).
-    glDrawArrays(GL_TRIANGLES, 0, 36);
+    for(int i = 0; i < 5; i++) {
+      for(int j = 0; j < 5; j++) {
+        if(level_layout[i][j]) {
+          kmMat4 model;
+          kmMat4Identity(&model);
+          GLint uniModel = glGetUniformLocation(shader_program, "model");
+          kmMat4Translation(&model, (float) i, 0.0f, (float) j);
+          // Zapis do shadera.
+          glUniformMatrix4fv(uniModel, 1, GL_FALSE, &model.mat[0]);
+          glDrawArrays(GL_TRIANGLES, 0, 36);
+        }
+      }
+    }
+
+    kmMat4 view;
+    kmMat4 rotation;
+    kmMat4RotationYawPitchRoll(&rotation, 0.0f, torad(1.0f), 0.0f);
+    kmVec3MultiplyMat4(&p_eye, &p_eye, &rotation);
+    kmMat4LookAt(&view, &p_eye, &p_ctr, &p_up);
+    GLint uniView = glGetUniformLocation(shader_program, "view");
+    glUniformMatrix4fv(uniView, 1, GL_FALSE, &view.mat[0]);
+
+
 
     // Zamiana przedniego bufora z tylnim
     glfwSwapBuffers(window);
