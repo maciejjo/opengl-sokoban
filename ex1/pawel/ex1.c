@@ -16,8 +16,8 @@
 #define WIN_WIDTH 800
 #define WIN_HEIGHT 600
 
-const char *vs_filename = "src/shaders/vertex.glsl";
-const char *fs_filename = "src/shaders/fragment.glsl";
+const char *vs_filename = "vertex.glsl";
+const char *fs_filename = "fragment.glsl";
 
 int main()
 {
