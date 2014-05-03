@@ -226,6 +226,8 @@ int main()
     glDrawArrays(GL_TRIANGLES, 0, 36);
 
     glEnable(GL_STENCIL_TEST);
+
+    glStencilFunc(GL_ALWAYS, 1, 0xFF);
     glStencilOp(GL_KEEP, GL_KEEP, GL_REPLACE);
     glStencilMask(0xFF);
     glDepthMask(GL_FALSE);

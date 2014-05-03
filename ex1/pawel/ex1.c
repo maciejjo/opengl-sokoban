@@ -16,8 +16,8 @@
 #define WIN_WIDTH 800
 #define WIN_HEIGHT 600
 
-const char *vs_filename = "vertex.glsl";
-const char *fs_filename = "fragment.glsl";
+const char *vs_filename = "src/shaders/vertex.glsl";
+const char *fs_filename = "src/shaders/fragment.glsl";
 
 int main()
 {
@@ -226,6 +226,8 @@ int main()
     glDrawArrays(GL_TRIANGLES, 0, 36);
 
     glEnable(GL_STENCIL_TEST);
+
+    glStencilFunc(GL_ALWAYS, 1, 0xFF);
     glStencilOp(GL_KEEP, GL_KEEP, GL_REPLACE);
     glStencilMask(0xFF);
     glDepthMask(GL_FALSE);
