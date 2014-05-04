@@ -230,6 +230,7 @@ int main()
   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 
+  /*
   // Drugą teksutrę zapisujemy do GL_TEXTURE1
   glActiveTexture(GL_TEXTURE1);
   glBindTexture(GL_TEXTURE_2D, textures[1]);
@@ -243,6 +244,7 @@ int main()
   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+  */
   // ******************************
 
 
@@ -277,8 +279,8 @@ int main()
   // Ustawienie koloru czyszczenia ekranu
   glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
 
-    kmVec3 p_eye = { 8.0f, 3.0f, 8.0f };
-    kmVec3 p_ctr = { 3.0f, 0.0f, 3.0f };
+    kmVec3 p_eye = { 5.0f, 10.0f, 5.0f };
+    kmVec3 p_ctr = { 2.5f, 0.0f, 2.5f };
     kmVec3 p_up  = { 0.0f, 1.0f, 0.0f };
 
   // Pętla programu
@@ -296,16 +298,27 @@ int main()
           kmMat4Translation(&model, (float) i, 0.0f, (float) j);
           // Zapis do shadera.
           glUniformMatrix4fv(uniModel, 1, GL_FALSE, &model.mat[0]);
-          glDrawArrays(GL_TRIANGLES, 0, 36);
+          glDrawArrays(GL_TRIANGLES, 0, 42);
         }
       }
     }
 
     kmMat4 view;
-    kmMat4 rotation;
-    kmMat4RotationYawPitchRoll(&rotation, 0.0f, torad(1.0f), 0.0f);
-    kmVec3MultiplyMat4(&p_eye, &p_eye, &rotation);
-    kmMat4LookAt(&view, &p_eye, &p_ctr, &p_up);
+    kmMat4 pitch_rotation_mat;
+
+    //kmMat4RotationYawPitchRoll(&pitch_rotation_mat, 0.0f, torad(1.0f), 0.0f);
+    kmMat4RotationAxisAngle(&pitch_rotation_mat, &p_up, torad(1.0f));
+    kmVec3MultiplyMat4(&p_eye, &p_eye, &pitch_rotation_mat);
+
+    kmVec3 p_eye_diff;
+    kmVec3Subtract(&p_eye_diff, &p_eye, &p_ctr);
+    kmVec3Mul(&p_eye_diff, &p_eye_diff, &p_eye);
+    kmVec3 p_eye_fix;
+
+    kmVec3Add(&p_eye_fix, &p_eye, &p_ctr);
+
+
+    kmMat4LookAt(&view, &p_eye_fix, &p_ctr, &p_up);
     GLint uniView = glGetUniformLocation(shader_program, "view");
     glUniformMatrix4fv(uniView, 1, GL_FALSE, &view.mat[0]);
 

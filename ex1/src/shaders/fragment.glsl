@@ -9,6 +9,6 @@ uniform sampler2D tex_shit;
 
 void main()
 {
-  vec4 color = mix(texture2D(tex_crate, Texcoord), texture2D(tex_shit,Texcoord), 0.4);
+  vec4 color = texture2D(tex_crate, Texcoord);
   gl_FragColor = color * vec4(Color, 1.0);
 }
