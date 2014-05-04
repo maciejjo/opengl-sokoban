@@ -2,7 +2,7 @@ TARGET		= ex1
 CC				= clang -c
 LINKER		= clang
 CFLAGS		= -Wall -Wextra -pedantic -O2 -g -std=gnu99
-LFLAGS		= -lglfw -lSOIL -lGLEW -lGL -lkazmath -lm
+LFLAGS		= -lglfw -lSOIL -lGLEW -lGL -lkazmath -lassimp -lm
 
 
 SRCDIR		= src

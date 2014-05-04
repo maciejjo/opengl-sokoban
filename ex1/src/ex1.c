@@ -8,7 +8,6 @@
 #include <GLFW/glfw3.h>
 #include <SOIL/SOIL.h>
 #include <kazmath/kazmath.h>
-#include <kazmath/vec4.h>
 
 // Zarządzanie shaderami
 #include "shader_utils.h"
@@ -18,8 +17,8 @@
 #define todeg(x) ((x) * 180.0f / M_PI)
 
 // Parametry okna
-#define WIN_WIDTH 800
-#define WIN_HEIGHT 600
+#define WIN_WIDTH 1024
+#define WIN_HEIGHT 768
 
 // Ścieżki do shaderów
 const char *vs_filename = "src/shaders/vertex.glsl";
@@ -298,7 +297,7 @@ int main()
           kmMat4Translation(&model, (float) i, 0.0f, (float) j);
           // Zapis do shadera.
           glUniformMatrix4fv(uniModel, 1, GL_FALSE, &model.mat[0]);
-          glDrawArrays(GL_TRIANGLES, 0, 42);
+          glDrawArrays(GL_TRIANGLES, 0, 36);
         }
       }
     }
