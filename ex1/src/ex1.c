@@ -11,6 +11,7 @@
 
 // Zarządzanie shaderami
 #include "shader_utils.h"
+#include "mesh.h"
 
 // Zamiana stopnie <-> radiany
 #define torad(x) ((x) * M_PI / 180.0f)
@@ -98,6 +99,7 @@ int main()
   GLuint vbo;
   glGenBuffers(1, &vbo);
 
+/*
   // Tablica wierzchołków. Do VBO trzeba pisać z płaskiej tablicy. Więc po kolei
   // w rzędach podane są wierzchołki. Schemat jest następujący:
   // X      Y      Z     R     G     B     Xt    Yt
@@ -159,6 +161,7 @@ int main()
     { 1, 1, 0, 0, 1 },
     { 1, 1, 1, 1, 1 },
   };
+*/
 
 
   // Żeby pisać do bufora, trzeba go zbindować. Bindujemy do targetu GL_ARRAY_BUFFER
@@ -167,7 +170,7 @@ int main()
   // zapisujemy do obecnie zbindowanego bufora do GL_ARRAY_BUFFER.
   // dalej podajemy rozmiar danych, adres danych, i rodzaj rysowania
   // (do optymalizacji pamięci)
-  glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
+ // glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
 
 
   // ***** Kompilacja shaderów *****
@@ -278,16 +281,35 @@ int main()
   // Ustawienie koloru czyszczenia ekranu
   glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
 
-    kmVec3 p_eye = { 5.0f, 10.0f, 5.0f };
-    kmVec3 p_ctr = { 2.5f, 0.0f, 2.5f };
-    kmVec3 p_up  = { 0.0f, 1.0f, 0.0f };
+  kmVec3 p_eye = { 5.0f, 10.0f, 5.0f };
+  kmVec3 p_ctr = { 2.5f, 0.0f, 2.5f };
+  kmVec3 p_up  = { 0.0f, 1.0f, 0.0f };
+
+  kmMat4 view;
+  //kmMat4 pitch_rotation_mat;
+
+  kmMat4LookAt(&view, &p_eye, &p_ctr, &p_up);
+  GLint uniView = glGetUniformLocation(shader_program, "view");
+  glUniformMatrix4fv(uniView, 1, GL_FALSE, &view.mat[0]);
+
+
+  struct mesh *monkey = create_mesh("suzanne.obj");
+  mesh_load(monkey);
+  monkey->shader_program = shader_program;
+  printf("%s\n", monkey->filename);
+  printf("Vertex no: %d\n", monkey->v_no);
+  printf("Faces no: %d\n", monkey->i_no);
+
 
   // Pętla programu
   while(!glfwWindowShouldClose(window)) {
 
     // Czyścimy ekran na zadany kolor
     glClear(GL_COLOR_BUFFER_BIT|GL_DEPTH_BUFFER_BIT);
+    glBindVertexArray(monkey->vao);
+    glDrawArrays(GL_TRIANGLES, 0, monkey->v_no);
 
+    /*
     for(int i = 0; i < 5; i++) {
       for(int j = 0; j < 5; j++) {
         if(level_layout[i][j]) {
@@ -301,11 +323,10 @@ int main()
         }
       }
     }
-
-    kmMat4 view;
-    kmMat4 pitch_rotation_mat;
+    */
 
     //kmMat4RotationYawPitchRoll(&pitch_rotation_mat, 0.0f, torad(1.0f), 0.0f);
+    /*
     kmMat4RotationAxisAngle(&pitch_rotation_mat, &p_up, torad(1.0f));
     kmVec3MultiplyMat4(&p_eye, &p_eye, &pitch_rotation_mat);
 
@@ -315,11 +336,9 @@ int main()
     kmVec3 p_eye_fix;
 
     kmVec3Add(&p_eye_fix, &p_eye, &p_ctr);
+    */
 
 
-    kmMat4LookAt(&view, &p_eye_fix, &p_ctr, &p_up);
-    GLint uniView = glGetUniformLocation(shader_program, "view");
-    glUniformMatrix4fv(uniView, 1, GL_FALSE, &view.mat[0]);
 
 
 
@@ -331,6 +350,7 @@ int main()
     if(glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS)
       glfwSetWindowShouldClose(window, GL_TRUE);
   }
+
 
   glfwTerminate();
 
