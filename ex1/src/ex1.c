@@ -153,7 +153,9 @@ int main()
     -1.0f,  1.0f, -0.5f, 0.0f, 0.0f, 0.0f, 0.0f, 1.0f,
     -1.0f, -1.0f, -0.5f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f,
 };
+*/
 
+  /*
   unsigned int level_layout[5][5] = {
     { 1, 1, 1, 1, 1 },
     { 1, 0, 1, 0, 1 },
@@ -161,7 +163,7 @@ int main()
     { 1, 1, 0, 0, 1 },
     { 1, 1, 1, 1, 1 },
   };
-*/
+  */
 
 
   // Żeby pisać do bufora, trzeba go zbindować. Bindujemy do targetu GL_ARRAY_BUFFER
@@ -190,6 +192,8 @@ int main()
   glUseProgram(shader_program);
   // ******************************
 
+  
+  /*
   // ***** Informacja dla shadera jak są ułożone dane w buforze *****
   GLint posAttrib = glGetAttribLocation(shader_program, "position");
   glEnableVertexAttribArray(posAttrib);
@@ -210,7 +214,9 @@ int main()
   glVertexAttribPointer(texAttrib, 2, GL_FLOAT, GL_FALSE, 8 * sizeof(float),
       (void *) (6 * sizeof(float)));
   // ***************************************************************
+  */
 
+  /*
   // *****  Ładowanie tekstur *****
   GLuint textures[2];
   glGenTextures(2, textures);
@@ -232,7 +238,6 @@ int main()
   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 
-  /*
   // Drugą teksutrę zapisujemy do GL_TEXTURE1
   glActiveTexture(GL_TEXTURE1);
   glBindTexture(GL_TEXTURE_2D, textures[1]);
@@ -281,8 +286,8 @@ int main()
   // Ustawienie koloru czyszczenia ekranu
   glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
 
-  kmVec3 p_eye = { 5.0f, 10.0f, 5.0f };
-  kmVec3 p_ctr = { 2.5f, 0.0f, 2.5f };
+  kmVec3 p_eye = { 0.1f, 5.0f, 0.0f };
+  kmVec3 p_ctr = { 0.0f, 0.0f, 0.0f };
   kmVec3 p_up  = { 0.0f, 1.0f, 0.0f };
 
   kmMat4 view;
@@ -293,54 +298,31 @@ int main()
   glUniformMatrix4fv(uniView, 1, GL_FALSE, &view.mat[0]);
 
 
-  struct mesh *monkey = create_mesh("suzanne.obj");
-  mesh_load(monkey);
+  struct mesh *monkey = create_mesh("mesh/bunny.obj");
   monkey->shader_program = shader_program;
+  mesh_load(monkey);
   printf("%s\n", monkey->filename);
   printf("Vertex no: %d\n", monkey->v_no);
   printf("Faces no: %d\n", monkey->i_no);
 
 
   // Pętla programu
+  float angle = 0.0f;
   while(!glfwWindowShouldClose(window)) {
+
+    angle += 1.0f;
 
     // Czyścimy ekran na zadany kolor
     glClear(GL_COLOR_BUFFER_BIT|GL_DEPTH_BUFFER_BIT);
     glBindVertexArray(monkey->vao);
+    //glBindBuffer(GL_ARRAY_BUFFER, monkey->vbo_vert);
     glDrawArrays(GL_TRIANGLES, 0, monkey->v_no);
 
-    /*
-    for(int i = 0; i < 5; i++) {
-      for(int j = 0; j < 5; j++) {
-        if(level_layout[i][j]) {
-          kmMat4 model;
-          kmMat4Identity(&model);
-          GLint uniModel = glGetUniformLocation(shader_program, "model");
-          kmMat4Translation(&model, (float) i, 0.0f, (float) j);
-          // Zapis do shadera.
-          glUniformMatrix4fv(uniModel, 1, GL_FALSE, &model.mat[0]);
-          glDrawArrays(GL_TRIANGLES, 0, 36);
-        }
-      }
-    }
-    */
-
-    //kmMat4RotationYawPitchRoll(&pitch_rotation_mat, 0.0f, torad(1.0f), 0.0f);
-    /*
-    kmMat4RotationAxisAngle(&pitch_rotation_mat, &p_up, torad(1.0f));
-    kmVec3MultiplyMat4(&p_eye, &p_eye, &pitch_rotation_mat);
-
-    kmVec3 p_eye_diff;
-    kmVec3Subtract(&p_eye_diff, &p_eye, &p_ctr);
-    kmVec3Mul(&p_eye_diff, &p_eye_diff, &p_eye);
-    kmVec3 p_eye_fix;
-
-    kmVec3Add(&p_eye_fix, &p_eye, &p_ctr);
-    */
-
-
-
-
+    kmMat4 model;
+    kmMat4Identity(&model);
+    kmMat4RotationZ(&model, torad(angle));
+    GLint uniModel = glGetUniformLocation(shader_program, "model");
+    glUniformMatrix4fv(uniModel, 1, GL_FALSE, &model.mat[0]);
 
     // Zamiana przedniego bufora z tylnim
     glfwSwapBuffers(window);

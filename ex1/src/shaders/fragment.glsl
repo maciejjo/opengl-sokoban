@@ -12,4 +12,5 @@ void main()
 {
    //texture2D(tex_crate, Texcoord);
   gl_FragColor = vec4(1.0, 1.0, 1.0, 1.0);
+  gl_FragColor = vec4(Normal, 1.0);
 }

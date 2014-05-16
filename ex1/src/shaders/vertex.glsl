@@ -17,5 +17,6 @@ void main()
 {
   Color = color;
   Texcoord = texcoord;
+  Normal = normal;
   gl_Position = proj * view * model * vec4(position, 1.0);
 }
