@@ -8,6 +8,7 @@
 // Zarządzanie shaderami
 #include "shader.h"
 #include "mesh.h"
+#include "game.h"
 
 // Zamiana stopnie <-> radiany
 #define torad(x) ((x) * M_PI / 180.0f)
@@ -137,6 +138,9 @@ int main()
   printf("%s\n", monkey->filename);
   printf("Vertex no: %d\n", monkey->v_no);
   printf("Faces no: %d\n", monkey->i_no);
+
+  level *lv = level_create("lvl/lvl1");
+  printf("Width: %d Height: %d\n", lv->width, lv->height);
 
   // Pętla programu
   float angle = 0.0f;
