@@ -10,8 +10,10 @@
 #include <stdio.h>
 #include <string.h>
 
+#include "shader.h"
 
-struct mesh {
+
+typedef struct mesh {
 
   char filename[64];
   GLuint vbo_vert;
@@ -19,14 +21,15 @@ struct mesh {
   GLuint vbo_texcoord;
   GLuint ibo;
   GLuint vao;
-  GLuint shader_program;
+  shader *shader;
 
   unsigned int v_no, i_no;
 
-};
+} mesh;
 
-struct mesh *create_mesh();
-int mesh_load(struct mesh *mesh);
+mesh *mesh_create();
+int mesh_load_mesh(mesh *mesh);
+void mesh_load_shader(mesh *mesh, shader *shader);
 
 #endif
 

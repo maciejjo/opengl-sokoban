@@ -1,37 +1,43 @@
 #include <stdlib.h>
 #include <stdio.h>
-#include <GL/glew.h>
-#include <GL/freeglut.h>
+#include <string.h>
 
-#include "shader_utils.h"
+#include "shader.h"
+#include "file_utils.h"
 
-char *file_read(const char *filename) {
+shader *shader_init(const char *vs, const char *fs) {
 
-  FILE *input = fopen(filename, "rb");
-  if(input == NULL) return NULL;
+  shader *s = malloc(sizeof(shader));
+  strcpy(s->fragment_filename, fs);
+  strcpy(s->vertex_filename, vs);
 
-  if(fseek(input, 0, SEEK_END) == -1) return NULL;
-
-  long size = ftell(input);
-  if(size == -1) return NULL;
-  if(fseek(input, 0, SEEK_SET) == -1) return NULL;
-
-  char *content = (char *) malloc((size_t) size + 1);
-  if(content == NULL) return NULL;
-
-  fread(content, 1, (size_t) size, input);
-  if(ferror(input)) {
-    free(content);
-    return NULL;
-  }
-
-  fclose(input);
-  content[size] = '\0';
-  return content;
+  return s;
 
 }
 
-void print_log(GLuint object) {
+GLuint shader_program_create(shader *s) {
+  GLuint vs, fs, shader_program;
+  if((vs = shader_create(s->vertex_filename,
+          GL_VERTEX_SHADER)) == 0) return EXIT_FAILURE;
+  if((fs = shader_create(s->fragment_filename,
+          GL_FRAGMENT_SHADER)) == 0) return EXIT_FAILURE;
+  shader_program = glCreateProgram();
+
+  if(!shader_program) {
+    fprintf(stderr, "Error creating shader shader_program\n");
+    return -1;
+  }
+
+  glAttachShader(shader_program, vs);
+  glAttachShader(shader_program, fs);
+  glLinkProgram(shader_program);
+
+  s->id = shader_program;
+  return 1;
+}
+
+
+void shader_print_log(GLuint object) {
 
   GLint log_length = 0;
   if(glIsShader(object))
@@ -55,7 +61,7 @@ void print_log(GLuint object) {
 
 }
 
-GLuint create_shader(const char *filename, GLenum type) {
+GLuint shader_create(const char *filename, GLenum type) {
 
   const GLchar *source = file_read(filename);
   if(source == NULL) {
@@ -73,7 +79,7 @@ GLuint create_shader(const char *filename, GLenum type) {
   glGetShaderiv(res, GL_COMPILE_STATUS, &compile_ok);
   if(compile_ok == GL_FALSE) {
     fprintf(stderr, "%s:", filename);
-    print_log(res);
+    shader_print_log(res);
     glDeleteShader(res);
     return 0;
   }
