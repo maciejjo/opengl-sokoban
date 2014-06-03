@@ -132,7 +132,7 @@ int main()
 
 
   struct mesh *monkey = mesh_create("mesh/monkey.obj");
-  monkey->shader = s;
+  mesh_load_shader(monkey, s);
   mesh_load_mesh(monkey);
   printf("%s\n", monkey->filename);
   printf("Vertex no: %d\n", monkey->v_no);
