@@ -7,6 +7,7 @@ LFLAGS		= -lkazmath -lglut -lGLEW -lGL -lm -lglfw -lassimp
 
 SRCDIR		= src
 OBJDIR		= obj
+BINDIR		= bin
 
 SOURCES 	:= $(wildcard $(SRCDIR)/*.c)
 SRC_OBJECTS		:= $(SOURCES:$(SRCDIR)/%.c=$(OBJDIR)/%.o)
@@ -14,7 +15,7 @@ SRC_OBJECTS		:= $(SOURCES:$(SRCDIR)/%.c=$(OBJDIR)/%.o)
 REMOVE := rm -f
 
 
-$(TARGET): $(SRC_OBJECTS)
+$(BINDIR)/$(TARGET): $(SRC_OBJECTS)
 	$(LINKER) $(LFLAGS) -o $@ $(SRC_OBJECTS)
 	@echo "Linking complete"
 
