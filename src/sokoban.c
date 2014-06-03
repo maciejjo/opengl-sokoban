@@ -6,7 +6,7 @@
 
 
 // Zarządzanie shaderami
-#include "shader_utils.h"
+#include "shader.h"
 #include "mesh.h"
 
 // Zamiana stopnie <-> radiany
@@ -72,20 +72,9 @@ int main()
 
 
   // ***** Kompilacja shaderów *****
-  GLuint vs, fs, shader_program;
-  if((vs = create_shader(vs_filename, GL_VERTEX_SHADER)) == 0) return EXIT_FAILURE;
-  if((fs = create_shader(fs_filename, GL_FRAGMENT_SHADER)) == 0) return EXIT_FAILURE;
-  shader_program = glCreateProgram();
-
-  if(!shader_program) {
-    fprintf(stderr, "Error creating shader shader_program\n");
-    return -1;
-  }
-
-  glAttachShader(shader_program, vs);
-  glAttachShader(shader_program, fs);
-  glLinkProgram(shader_program);
-  glUseProgram(shader_program);
+  shader *s = shader_init(vs_filename, fs_filename);
+  shader_program_create(s);
+  glUseProgram(s->id);
   // ******************************
 
   /*
@@ -103,7 +92,7 @@ int main()
   glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, image);
   SOIL_free_image_data(image);
   // więc tu trzeba ustawić w shaderze parametr tex_crate na 0
-  glUniform1i(glGetUniformLocation(shader_program, "tex_crate"), 0);
+  glUniform1i(glGetUniformLocation(s->id, "tex_crate"), 0);
 
   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
@@ -117,7 +106,7 @@ int main()
   glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, image);
   SOIL_free_image_data(image);
   // więc tu piszemy do shadera tex_shit na 1
-  glUniform1i(glGetUniformLocation(shader_program, "tex_shit"), 1);
+  glUniform1i(glGetUniformLocation(s->id, "tex_shit"), 1);
 
   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
@@ -128,7 +117,7 @@ int main()
 
   kmMat4 proj;
   kmMat4PerspectiveProjection(&proj, 45.0f, (float) WIN_WIDTH / (float) WIN_HEIGHT, 1.0f, 100.0f);
-  GLint uniProj = glGetUniformLocation(shader_program, "proj");
+  GLint uniProj = glGetUniformLocation(s->id, "proj");
   // Zapis do shadera.
   glUniformMatrix4fv(uniProj, 1, GL_FALSE, &proj.mat[0]);
   // *********************
@@ -138,13 +127,13 @@ int main()
   kmVec3 p_up  = { 0.0f, 1.0f, 0.0f };
   kmMat4 view;
   kmMat4LookAt(&view, &p_eye, &p_ctr, &p_up);
-  GLint uniView = glGetUniformLocation(shader_program, "view");
+  GLint uniView = glGetUniformLocation(s->id, "view");
   glUniformMatrix4fv(uniView, 1, GL_FALSE, &view.mat[0]);
 
 
-  struct mesh *monkey = create_mesh("mesh/monkey.obj");
-  monkey->shader_program = shader_program;
-  mesh_load(monkey);
+  struct mesh *monkey = mesh_create("mesh/monkey.obj");
+  monkey->shader = s;
+  mesh_load_mesh(monkey);
   printf("%s\n", monkey->filename);
   printf("Vertex no: %d\n", monkey->v_no);
   printf("Faces no: %d\n", monkey->i_no);
@@ -168,7 +157,7 @@ int main()
     kmMat4RotationY(&model, torad(angle));
     kmMat4Multiply(&model, &fix_rotation, &model);
 
-    GLint uniModel = glGetUniformLocation(shader_program, "model");
+    GLint uniModel = glGetUniformLocation(s->id, "model");
     glUniformMatrix4fv(uniModel, 1, GL_FALSE, &model.mat[0]);
 
     // Zamiana przedniego bufora z tylnim

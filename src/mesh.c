@@ -1,6 +1,6 @@
 #include "mesh.h"
 
-struct mesh *create_mesh(char *fn) {
+struct mesh *mesh_create(char *fn) {
 
 struct mesh *m = malloc(sizeof(struct mesh));
 strcpy(m->filename, fn);
@@ -8,7 +8,7 @@ return m;
 
 }
 
-int mesh_load(struct mesh *mesh) {
+int mesh_load_mesh(struct mesh *mesh) {
 
   const struct aiScene *scene = aiImportFile(mesh->filename, aiProcess_Triangulate);
   if(!scene) {
@@ -42,7 +42,7 @@ int mesh_load(struct mesh *mesh) {
     normals = malloc (mesh->v_no * 3 * sizeof(GLfloat));
     for(unsigned int i = 0; i < mesh->v_no; i++) {
       const struct aiVector3D *vn = &(mesh_ai->mNormals[i]);
-      printf("Loading %f, %f, %f\n", vn->x, vn->y, vn->z);
+      //printf("Loading %f, %f, %f\n", vn->x, vn->y, vn->z);
       normals[i * 3] = (GLfloat) vn->x;
       normals[i * 3 + 1] = (GLfloat) vn->y;
       normals[i * 3 + 2] = (GLfloat) vn->z;
@@ -66,7 +66,7 @@ int mesh_load(struct mesh *mesh) {
     glBindBuffer(GL_ARRAY_BUFFER, vbo);
     glBufferData(GL_ARRAY_BUFFER, 3 * mesh->v_no * sizeof(GLfloat),
         points, GL_STATIC_DRAW);
-    GLint posAttrib = glGetAttribLocation(mesh->shader_program, "position");
+    GLint posAttrib = glGetAttribLocation(mesh->shader->id, "position");
     glVertexAttribPointer(posAttrib, 3, GL_FLOAT, GL_FALSE, 0, 0);
     glEnableVertexAttribArray(posAttrib);
     free(points);
@@ -80,7 +80,7 @@ int mesh_load(struct mesh *mesh) {
     glBindBuffer(GL_ARRAY_BUFFER, vbo);
     glBufferData(GL_ARRAY_BUFFER, 3 * mesh->v_no * sizeof(GLuint),
         points, GL_STATIC_DRAW);
-    GLint normAttrib = glGetAttribLocation(mesh->shader_program, "normal");
+    GLint normAttrib = glGetAttribLocation(mesh->shader->id, "normal");
     glVertexAttribPointer(normAttrib, 3, GL_FLOAT, GL_FALSE, 0, NULL);
     glEnableVertexAttribArray(normAttrib);
     free(normals);
@@ -93,7 +93,7 @@ int mesh_load(struct mesh *mesh) {
     //glGenBuffers(1, &mesh->vbo_texcoord);
     glBindBuffer(GL_ARRAY_BUFFER, vbo);
     glBufferData(GL_ARRAY_BUFFER, 2 * mesh->v_no, points, GL_STATIC_DRAW);
-    GLint texcoordAttrib = glGetAttribLocation(mesh->shader_program, "texcoord");
+    GLint texcoordAttrib = glGetAttribLocation(mesh->shader->id, "texcoord");
     glVertexAttribPointer(texcoordAttrib, 2, GL_FLOAT, GL_FALSE, 0, 0);
     glEnableVertexAttribArray(texcoordAttrib);
     free(texcoords);
@@ -103,4 +103,10 @@ int mesh_load(struct mesh *mesh) {
   printf("Mesh loaded\n");
 
   return 0;
+}
+
+void mesh_load_shader(mesh *mesh, shader *shader) {
+
+  mesh->shader = shader;
+
 }
