@@ -1,8 +1,8 @@
 TARGET		= sokoban
-CC				= gcc -c
-LINKER		= gcc
-CFLAGS		= -Wall -Wextra -pedantic -O2 -g -std=gnu99
-LFLAGS		= -lkazmath -lglut -lGLEW -lGL -lm
+CC				= clang -c
+LINKER		= clang
+CFLAGS		= -Wall -Wextra -Werror -pedantic -O2 -g -std=gnu99
+LFLAGS		= -lkazmath -lglut -lGLEW -lGL -lm -lglfw -lassimp
 
 
 SRCDIR		= src
