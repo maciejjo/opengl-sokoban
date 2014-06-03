@@ -19,16 +19,19 @@ Koncepcja:
 TODO:
 - menu (GUI/CLI)
 - modele (z neta, blender),
-- ładowanie modeli (format OBJ),
-- plansze (wymyślić format),
-- ładowanie planszy,
 - sterowanie kulą,
 - sterowanie kamerą,
 - ...and many more
 
+DONE:
+- ładowanie modeli (format OBJ),
+- plansze (wymyślić format),
+- ładowanie planszy,
+
 Biblioteki:
 - OpenGL 2.1,
-- Freeglut3 (albo GLFW),
-- GLM,
-- SOIL
+- GLFW,
+- kazmath,
+- SOIL,
+- assimp
 
