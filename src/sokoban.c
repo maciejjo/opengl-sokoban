@@ -7,7 +7,7 @@
 #include "mesh.h"
 #include "game.h"
 
-# define M_PI		3.14159265358979323846	/* pi */
+# define M_PI		3.14159265358979323846
 #define torad(x) ((x) * M_PI / 180.0f)
 #define todeg(x) ((x) * 180.0f / M_PI)
 
@@ -63,34 +63,43 @@ int main()
   GLint uniView = glGetUniformLocation(s->id, "view");
   glUniformMatrix4fv(uniView, 1, GL_FALSE, &view.mat[0]);
 
-  struct mesh *monkey = mesh_create("mesh/box2.obj");
+  struct mesh *monkey = mesh_create("mesh/monkey.obj");
   mesh_load_shader(monkey, s);
   mesh_load_mesh(monkey);
 
 
+  float angle_frame = 1.0f;
   float angle = 0.0f;
   while(!glfwWindowShouldClose(window)) {
 
     glClear(GL_COLOR_BUFFER_BIT|GL_DEPTH_BUFFER_BIT);
     glBindVertexArray(monkey->vao);
 
-    angle += 1.0f;
+    angle += 1.1f;
+
+    kmMat4 yaw;
+    kmMat4RotationY(&yaw, torad(angle_frame));
+    //kmMat4Multiply(&view, &view, &yaw);
+    kmVec3MultiplyMat4(&p_eye, &p_eye, &yaw);
+    kmMat4LookAt(&view, &p_eye, &p_ctr, &p_up);
+    GLint uniView = glGetUniformLocation(s->id, "view");
+    glUniformMatrix4fv(uniView, 1, GL_FALSE, &view.mat[0]);
 
     for(int i = 0; i < lv->height; i++) {
       for(int j = 0; j < lv->width; j++) {
 
+
         kmMat4 model;
         kmMat4Identity(&model);
-        //kmMat4RotationY(&model, torad(angle));
-        kmMat4Translation(&model, 2*i, 0, 2*j);
+        kmMat4 rotate;
+        kmMat4RotationY(&rotate, torad(angle));
+        kmMat4Translation(&model, 2.5*i, 0, 2.5*j);
+        kmMat4Multiply(&model, &model, &rotate);
         GLint uniModel = glGetUniformLocation(s->id, "model");
         glUniformMatrix4fv(uniModel, 1, GL_FALSE, &model.mat[0]);
         glDrawArrays(GL_TRIANGLES, 0, monkey->v_no);
       }
     }
-
-
-
 
     glfwSwapBuffers(window);
 
