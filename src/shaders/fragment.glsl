@@ -23,7 +23,7 @@ void main()
   float nl = max(dot(n_n, n_l),0);
   float rv = pow(max(dot(r, n_v), 0), 3);
 
-  gl_FragColor = vec4(Color, 1) * vec4(nl,nl,nl,1); //+vec4(rv,rv,rv,1);
+  gl_FragColor = vec4(Color, 1) * vec4(nl,nl,nl,1)+vec4(rv,rv,rv,1);
 
    //texture2D(tex_crate, Texcoord);
 //  gl_FragColor = Color;

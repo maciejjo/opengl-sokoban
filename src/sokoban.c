@@ -11,11 +11,8 @@
 #define torad(x) ((x) * M_PI / 180.0f)
 #define todeg(x) ((x) * 180.0f / M_PI)
 
-#define WIN_WIDTH 1024
+#define WIN_WIDTH 1366
 #define WIN_HEIGHT 768
-
-const char *vs_filename = "src/shaders/vertex.glsl";
-const char *fs_filename = "src/shaders/fragment.glsl";
 
 int main()
 {
@@ -44,46 +41,82 @@ int main()
   glEnable(GL_DEPTH_TEST);
   glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
 
-  shader *s = shader_init(vs_filename, fs_filename);
+  shader *s = shader_init("src/shaders/vertex.glsl", "src/shaders/fragment.glsl");
   shader_program_create(s);
   glUseProgram(s->id);
 
   level *lv = level_create("lvl/lvl1");
+
+  float trans = 2.5;
+  float mid_x = (lv->height -1) * trans  / 2;
+  float mid_y = (lv->width -1 ) * trans  / 2;
 
   kmMat4 proj;
   kmMat4PerspectiveProjection(&proj, 90.0f, (float) WIN_WIDTH / (float) WIN_HEIGHT, 1.0f, 100.0f);
   GLint uniProj = glGetUniformLocation(s->id, "proj");
   glUniformMatrix4fv(uniProj, 1, GL_FALSE, &proj.mat[0]);
 
-  kmVec3 p_eye = { 0.0f, 5.0f, 15.0f };
-  kmVec3 p_ctr = { (3.0f * lv->height)/2.0f, 1.5f, (3.0f * lv->width)/2.0f};
+  printf("Kamera patrzy na %f, %f\n", mid_x, mid_y);
+
+  kmVec3 p_eye = { 0.0f, 10.0f, 0.0f};
+  kmVec3 p_ctr = { mid_x, 0.0f, mid_y};
   kmVec3 p_up  = { 0.0f, 1.0f, 0.0f };
   kmMat4 view;
   kmMat4LookAt(&view, &p_eye, &p_ctr, &p_up);
   GLint uniView = glGetUniformLocation(s->id, "view");
   glUniformMatrix4fv(uniView, 1, GL_FALSE, &view.mat[0]);
 
-  struct mesh *monkey = mesh_create("mesh/monkey.obj");
+  struct mesh *monkey = mesh_create("mesh/box2.obj");
   mesh_load_shader(monkey, s);
   mesh_load_mesh(monkey);
 
+  double x,y;
+  double p_x, p_y;
 
-  float angle_frame = 1.0f;
-  float angle = 0.0f;
+    kmMat4 yaw;
+    kmVec3 Axis;
+    kmVec3 Diff;
+
+  float angle_x= 0.0f;
+  float angle_y= 0.0f;
   while(!glfwWindowShouldClose(window)) {
+
+    p_x = x;
+    p_y = y;
+    glfwGetCursorPos(window, &x, &y);
+
+
+    if(p_x > x)
+      angle_x= 0.5f * (p_x - x);
+    else if(p_x < x)
+      angle_x= -0.5f * (x - p_x);
+    else if(p_x == x)
+      angle_x= 0.0f;
+
+    if(p_y > y)
+      angle_y= 0.5f * (p_y - y);
+    else if(p_y < y)
+      angle_y= -0.5f * (y - p_y);
+    else if(p_y == y)
+      angle_y= 0.0f;
+
+
 
     glClear(GL_COLOR_BUFFER_BIT|GL_DEPTH_BUFFER_BIT);
     glBindVertexArray(monkey->vao);
 
-    angle += 1.1f;
 
-    kmMat4 yaw;
-    kmMat4RotationY(&yaw, torad(angle_frame));
-    //kmMat4Multiply(&view, &view, &yaw);
-    kmVec3MultiplyMat4(&p_eye, &p_eye, &yaw);
+    kmVec3Fill(&Axis, 0.0f, 1.0f, 0.0f);
+    kmVec3Subtract(&Diff, &p_eye, &p_ctr);
+    //kmVec3Mul(&Axis, &Axis, &Diff);
+    kmMat4RotationAxisAngle(&yaw, &Axis, torad(angle_x));
+    //kmMat4RotationY(&yaw, torad(angle_frame));
+    kmVec3MultiplyMat4(&p_eye, &Diff, &yaw);
+    kmVec3Add(&p_eye, &p_eye, &p_ctr);
     kmMat4LookAt(&view, &p_eye, &p_ctr, &p_up);
     GLint uniView = glGetUniformLocation(s->id, "view");
     glUniformMatrix4fv(uniView, 1, GL_FALSE, &view.mat[0]);
+
 
     for(int i = 0; i < lv->height; i++) {
       for(int j = 0; j < lv->width; j++) {
@@ -91,10 +124,10 @@ int main()
 
         kmMat4 model;
         kmMat4Identity(&model);
-        kmMat4 rotate;
-        kmMat4RotationY(&rotate, torad(angle));
-        kmMat4Translation(&model, 2.5*i, 0, 2.5*j);
-        kmMat4Multiply(&model, &model, &rotate);
+        kmMat4 rotatez;
+        kmMat4RotationX(&rotatez, torad(90));
+        kmMat4Translation(&model, trans*i, 0, trans*j);
+        kmMat4Multiply(&model, &model, &rotatez);
         GLint uniModel = glGetUniformLocation(s->id, "model");
         glUniformMatrix4fv(uniModel, 1, GL_FALSE, &model.mat[0]);
         glDrawArrays(GL_TRIANGLES, 0, monkey->v_no);
