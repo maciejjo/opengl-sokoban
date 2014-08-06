@@ -31,4 +31,6 @@ Biblioteki:
 - Freeglut3 (albo GLFW),
 - GLM,
 - SOIL
+- kazmath (https://github.com/Kazade/kazmath)
+- assimp
 
