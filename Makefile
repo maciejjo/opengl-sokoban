@@ -12,18 +12,20 @@ BINDIR		= bin
 SOURCES 	:= $(wildcard $(SRCDIR)/*.c)
 SRC_OBJECTS		:= $(SOURCES:$(SRCDIR)/%.c=$(OBJDIR)/%.o)
 
-REMOVE := rm -f
+REMOVE := rm -rf
 
 
 $(BINDIR)/$(TARGET): $(SRC_OBJECTS)
+	mkdir -p $(BINDIR)
 	$(LINKER) $(LFLAGS) -o $@ $(SRC_OBJECTS)
 	@echo "Linking complete"
 
 $(SRC_OBJECTS): $(OBJDIR)/%.o : $(SRCDIR)/%.c
+	mkdir -p $(OBJDIR)
 	$(CC) $(CFLAGS) $< -o $@
 	@echo "Compiled $<"
 
 .PHONY: clean
 clean:
-	$(REMOVE) $(SRC_OBJECTS)
+	$(REMOVE) $(SRC_OBJECTS) $(OBJDIR) $(BINDIR)
 	@echo "Deleted $<"
