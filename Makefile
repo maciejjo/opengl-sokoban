@@ -1,6 +1,4 @@
 TARGET		= sokoban
-CC				= clang -c
-LINKER		= clang
 CFLAGS		= -Wall -Wextra -Werror -pedantic -O2 -g -std=gnu99
 LFLAGS		= -lkazmath -lglut -lGLEW -lGL -lm -lglfw -lassimp
 
@@ -17,12 +15,12 @@ REMOVE := rm -rf
 
 $(BINDIR)/$(TARGET): $(SRC_OBJECTS)
 	mkdir -p $(BINDIR)
-	$(LINKER) $(LFLAGS) -o $@ $(SRC_OBJECTS)
+	$(CC) $(LFLAGS) -o $@ $(SRC_OBJECTS)
 	@echo "Linking complete"
 
 $(SRC_OBJECTS): $(OBJDIR)/%.o : $(SRCDIR)/%.c
 	mkdir -p $(OBJDIR)
-	$(CC) $(CFLAGS) $< -o $@
+	$(CC) -c $(CFLAGS) $< -o $@
 	@echo "Compiled $<"
 
 .PHONY: clean
