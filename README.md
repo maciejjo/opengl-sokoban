@@ -18,18 +18,18 @@ Koncepcja:
 
 TODO:
 - menu (GUI/CLI)
-- modele (z neta, blender),
-- ładowanie modeli (format OBJ),
-- plansze (wymyślić format),
-- ładowanie planszy,
-- sterowanie kulą,
-- sterowanie kamerą,
+- modele (z neta, blender)
+- ładowanie modeli (format OBJ)
+- plansze (wymyślić format)
+- ładowanie planszy
+- sterowanie kulą
+- sterowanie kamerą
 - ...and many more
 
 Biblioteki:
-- OpenGL 2.1,
-- Freeglut3 (albo GLFW),
-- GLM,
+- OpenGL 2.1
+- Freeglut3 (albo GLFW)
+- GLM
 - SOIL
 - kazmath (https://github.com/Kazade/kazmath)
 - assimp
