@@ -1,174 +1,233 @@
-// Biblioteki standardowe
 #include <stdlib.h>
 #include <stdio.h>
 #include <time.h>
 #include <math.h>
 
-
-// Zarządzanie shaderami
 #include "shader.h"
 #include "mesh.h"
+#include "game.h"
 
-// Zamiana stopnie <-> radiany
+#ifndef M_PI
+#define M_PI 3.14159265358979323846
+#endif
+
 #define torad(x) ((x) * M_PI / 180.0f)
 #define todeg(x) ((x) * 180.0f / M_PI)
 
-// Parametry okna
-#define WIN_WIDTH 1024
-#define WIN_HEIGHT 768
+#define WIN_WIDTH 640
+#define WIN_HEIGHT 480
 
-// Liczba pi
-# define M_PI		3.14159265358979323846	/* pi */
+float offset_x, offset_y;
 
-// Ścieżki do shaderów
-const char *vs_filename = "src/shaders/vertex.glsl";
-const char *fs_filename = "src/shaders/fragment.glsl";
+void key_callback(GLFWwindow* window, int key, int scancode, int action, int mods)
+{
+    if (action != GLFW_REPEAT && action != GLFW_PRESS)
+        return;
+
+    switch (key)
+    {
+        case GLFW_KEY_ESCAPE:
+            glfwSetWindowShouldClose(window, GL_TRUE);
+            break;
+        case GLFW_KEY_LEFT:
+            offset_x += 0.2f;
+            printf("Strzałka w lewo\n");
+            break;
+        case GLFW_KEY_RIGHT:
+            offset_x -= 0.2f;
+            printf("Strzałka w prawo\n");
+            break;
+        case GLFW_KEY_UP:
+            offset_y += 0.2f;
+            printf("Strzałka w górę\n");
+            break;
+        case GLFW_KEY_DOWN:
+            offset_y -= 0.2f;
+            printf("Strzałka w dół\n");
+            break;
+        default:
+            break;
+    }
+}
 
 int main()
 {
-
-  // ***** Inicjalizacja GLFW *****
   if(!glfwInit()) {
     fprintf(stderr, "Error initializing glfw\n");
     return EXIT_FAILURE;
   }
 
-  // Utworzenie okienka
   GLFWwindow *window;
-  window = glfwCreateWindow(WIN_WIDTH, WIN_HEIGHT, "Pszepyszna pszygoda pszemka", NULL, NULL);
+  window = glfwCreateWindow(WIN_WIDTH, WIN_HEIGHT,
+      "Pszepyszna pszygoda pszemka", NULL, NULL);
+
   if(!window) {
     fprintf(stderr, "Error initializing glfw\n");
     glfwTerminate();
     return EXIT_FAILURE;
   }
 
-  // Aktywowanie okienka
+  glfwSetKeyCallback(window, key_callback);
   glfwMakeContextCurrent(window);
-
-  // Ustawienie wersji OpenGL'a
   glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 2);
   glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 1);
   glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
+  glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);
+  glfwSwapInterval(2);
 
-  // Włącza VSYNC. (Renderowanie przy określonej liczbie klatek na sekundę)
-  // Bez tego klatki będą renderowane tak często jak to możliwe, przez co
-  // zużycie procesora będzie wynosiło kilkadziesiąt procent.
-  // 0 = wyłączony VSYNC, 1 = 60 FPS, 2 = 30 FPS, i tak dalej.
-  glfwSwapInterval(1);
-  // *****************************
-
-  // Inicjalizacja GLEW.
-  // GLEW zarządza funkcjami OpenGL'a.
   glewExperimental = GL_TRUE;
   glewInit();
 
-  // Włączenie Depth testu, czyli sprawdzania, czy dany trójkąt
-  // nie jest zasłonięty przez inny. Jeśli jest, to nie jest
-  // rysowany.
   glEnable(GL_DEPTH_TEST);
-
-  // Ustawienie koloru czyszczenia ekranu
   glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
 
-
-  // ***** Kompilacja shaderów *****
-  shader *s = shader_init(vs_filename, fs_filename);
+  shader *s = shader_init("src/shaders/vertex.glsl", "src/shaders/fragment.glsl");
   shader_program_create(s);
   glUseProgram(s->id);
-  // ******************************
 
-  /*
-  // *****  Ładowanie tekstur *****
-  GLuint textures[2];
-  glGenTextures(2, textures);
+  level *lv = level_create("lvl/lvl2");
 
-  int width, height;
-  unsigned char *image;
-
-  // Zapisujemy teksturę do GL_TEXTURE0
-  glActiveTexture(GL_TEXTURE0);
-  glBindTexture(GL_TEXTURE_2D, textures[0]);
-  image = SOIL_load_image("crate.jpg", &width, &height, 0, SOIL_LOAD_RGB);
-  glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, image);
-  SOIL_free_image_data(image);
-  // więc tu trzeba ustawić w shaderze parametr tex_crate na 0
-  glUniform1i(glGetUniformLocation(s->id, "tex_crate"), 0);
-
-  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-
-  // Drugą teksutrę zapisujemy do GL_TEXTURE1
-  glActiveTexture(GL_TEXTURE1);
-  glBindTexture(GL_TEXTURE_2D, textures[1]);
-  image = SOIL_load_image("shit.jpg", &width, &height, 0, SOIL_LOAD_RGB);
-  glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, image);
-  SOIL_free_image_data(image);
-  // więc tu piszemy do shadera tex_shit na 1
-  glUniform1i(glGetUniformLocation(s->id, "tex_shit"), 1);
-
-  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-  */
-  // ******************************
+  float trans = 2.0f;
+  float mid_x = (lv->height -1) * trans  / 2;
+  float mid_y = (lv->width -1 ) * trans  / 2;
 
   kmMat4 proj;
-  kmMat4PerspectiveProjection(&proj, 45.0f, (float) WIN_WIDTH / (float) WIN_HEIGHT, 1.0f, 100.0f);
+  kmMat4PerspectiveProjection(&proj, 90.0f, (float) WIN_WIDTH / (float) WIN_HEIGHT, 1.0f, 100.0f);
   GLint uniProj = glGetUniformLocation(s->id, "proj");
-  // Zapis do shadera.
   glUniformMatrix4fv(uniProj, 1, GL_FALSE, &proj.mat[0]);
-  // *********************
 
-  kmVec3 p_eye = { 0.1f, 5.0f, 0.0f };
-  kmVec3 p_ctr = { 0.0f, 0.0f, 0.0f };
+  printf("Kamera patrzy na %f, %f\n", mid_x, mid_y);
+
+  kmVec3 p_eye = { -5.0f, 10.0f, 0.0f};
+  kmVec3 p_ctr = { mid_x, 0.0f, mid_y};
   kmVec3 p_up  = { 0.0f, 1.0f, 0.0f };
   kmMat4 view;
   kmMat4LookAt(&view, &p_eye, &p_ctr, &p_up);
   GLint uniView = glGetUniformLocation(s->id, "view");
   glUniformMatrix4fv(uniView, 1, GL_FALSE, &view.mat[0]);
 
-
-  struct mesh *monkey = mesh_create("mesh/monkey.obj");
+  struct mesh *monkey = mesh_create("mesh/box2.obj");
   mesh_load_shader(monkey, s);
   mesh_load_mesh(monkey);
-  printf("%s\n", monkey->filename);
-  printf("Vertex no: %d\n", monkey->v_no);
-  printf("Faces no: %d\n", monkey->i_no);
 
-  // Pętla programu
-  float angle = 0.0f;
+  struct mesh *ball = mesh_create("mesh/sphere.obj");
+  mesh_load_shader(ball, s);
+  mesh_load_mesh(ball);
+
+  double x,y;
+  double p_x, p_y;
+
+  kmMat4 yaw;
+  kmMat4 pitch;
+  kmVec3 Axis;
+  kmVec3 Diff;
+
+  for(int i =0; i < 5; i++) {
+    for(int j =0; j < 5; j++) {
+      printf("%d ", lv->map[i][j]);
+    }
+    printf("\n");
+  }
+  printf("\n");
+
+  float angle_x= 0.0f;
+  float angle_y= 0.0f;
+  float sum_angle_x = 0.0f, sum_angle_y = 0.0f;
+  float angle= 0.0f;
+
   while(!glfwWindowShouldClose(window)) {
+
+    kmMat4LookAt(&view, &p_eye, &p_ctr, &p_up);
+
+    GLint uniView = glGetUniformLocation(s->id, "view");
+    glUniformMatrix4fv(uniView, 1, GL_FALSE, &view.mat[0]);
+
+    p_x = x;
+    p_y = y;
+    glfwGetCursorPos(window, &x, &y);
+
+    sum_angle_x += angle_x;
+    sum_angle_y += angle_y;
+
+
+    if(p_x > x)
+      angle_x= 0.5f * (p_x - x);
+    else if(p_x < x)
+      angle_x= -0.5f * (x - p_x);
+    else if(p_x == x)
+      angle_x= 0.0f;
+
+    if(p_y > y && sum_angle_y >= 34.0f)
+      angle_y= 0.5f * (p_y - y);
+    else if(p_y < y)
+      angle_y= -0.5f * (y - p_y);
+    else if(p_y == y)
+      angle_y= 0.0f;
+
+    printf("%.3f, %.3f\n", sum_angle_x, sum_angle_y);
+
+
+    glClear(GL_COLOR_BUFFER_BIT|GL_DEPTH_BUFFER_BIT);
+    glBindVertexArray(monkey->vao);
+
+    kmVec3Fill(&Axis, 0.0f, 1.0f, 0.0f);
+
+    kmMat4RotationAxisAngle(&yaw, &Axis, torad(angle_x));
+    kmVec3Subtract(&Diff, &p_eye, &p_ctr);
+    kmVec3MultiplyMat4(&p_eye, &Diff, &yaw);
+    kmVec3Add(&p_eye, &p_eye, &p_ctr);
+
+    kmVec4 x_axis = { 1.0f, 0.0f, 0.0f, 0.0f };
+    kmVec4MultiplyMat4(&x_axis, &x_axis, &view);
+    kmVec3 right_axis = { x_axis.x, x_axis.y, x_axis.z };
+    kmVec3Fill(&right_axis, 1.0f, 0.0f, 0.0f);
+    /*
+    kmVec3 pt, up;
+    kmVec3Subtract(&pt, &p_eye, &p_ctr);
+    kmVec3Subtract(&up, &p_up, &p_eye);
+    kmVec3Mul(&right_axis, &pt, &up);
+    */
+
+    kmMat4RotationAxisAngle(&pitch, &right_axis, torad(angle_y));
+    kmVec3Subtract(&Diff, &p_eye, &p_ctr);
+    kmVec3MultiplyMat4(&p_eye, &Diff, &pitch);
+    kmVec3Add(&p_eye, &p_eye, &p_ctr);
+
+    //printf("Camera right: %f %f %f\n", right_axis.x, right_axis.y, right_axis.z);
+
 
     angle += 1.0f;
 
-    // Czyścimy ekran na zadany kolor
-    glClear(GL_COLOR_BUFFER_BIT|GL_DEPTH_BUFFER_BIT);
-    glBindVertexArray(monkey->vao);
-    //glBindBuffer(GL_ARRAY_BUFFER, monkey->vbo_vert);
-    glDrawArrays(GL_TRIANGLES, 0, monkey->v_no);
 
+    for(int i = 0; i < lv->height; i++) {
+      for(int j = 0; j < lv->width; j++) {
+
+
+        if(lv->map[i][j] == 1) {
+          kmMat4 model;
+          kmMat4Identity(&model);
+          kmMat4 rotate;
+          kmMat4RotationY(&rotate, torad(angle));
+          kmMat4Translation(&model, trans*i, 0, trans*j);
+          GLint uniModel = glGetUniformLocation(s->id, "model");
+          glUniformMatrix4fv(uniModel, 1, GL_FALSE, &model.mat[0]);
+          glDrawArrays(GL_TRIANGLES, 0, monkey->v_no);
+        }
+      }
+    }
+
+    glBindVertexArray(ball->vao);
     kmMat4 model;
-    kmMat4 fix_rotation;
-    kmMat4Identity(&model);
-    kmMat4RotationZ(&fix_rotation, torad(90));
-    kmMat4RotationY(&model, torad(angle));
-    kmMat4Multiply(&model, &fix_rotation, &model);
-
+    kmMat4Translation(&model, mid_x + offset_x, 0, mid_y + offset_y);
     GLint uniModel = glGetUniformLocation(s->id, "model");
     glUniformMatrix4fv(uniModel, 1, GL_FALSE, &model.mat[0]);
+    glDrawArrays(GL_TRIANGLES, 0, ball->v_no);
 
-    // Zamiana przedniego bufora z tylnim
     glfwSwapBuffers(window);
 
-    // Obsługa klawiatury
     glfwPollEvents();
-    if(glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS)
-      glfwSetWindowShouldClose(window, GL_TRUE);
-  }
 
+  }
 
   glfwTerminate();
 

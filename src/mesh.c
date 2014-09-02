@@ -110,3 +110,7 @@ void mesh_load_shader(mesh *mesh, shader *shader) {
   mesh->shader = shader;
 
 }
+
+void mesh_load_texture() {
+
+}

@@ -20,12 +20,12 @@ varying vec4 v;
 void main()
 {
 
-  vec4 lightPos = vec4(0,7,0,1);
+  vec4 lightPos = vec4(5,5,5,1);
   l = normalize(view*lightPos - view*model*vec4(position,1));
   n = normalize(view*model*vec4(normal,0));
   v = normalize(vec4(0,0,0,1) - view*model*vec4(position,1));
 
   Texcoord = texcoord;
   gl_Position = proj * view * model * vec4(position, 1.0);
-  Color = vec3(0,1,0.5);
+  Color = vec3(0.1, 0.7, 0.0);
 }

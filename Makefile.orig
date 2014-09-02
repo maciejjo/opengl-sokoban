@@ -1,9 +1,15 @@
+<<<<<<< HEAD
+TARGET		= sokoban
+CFLAGS		= -Wall -Wextra -Werror -pedantic -O2 -g -std=gnu99
+LFLAGS		= -lkazmath -lglut -lGLEW -lGL -lm -lglfw -lassimp
+=======
 TARGET	= sokoban
 CC			= clang
 COMPILER = $(CC) -c
 LINKER	= $(CC)
 CFLAGS	= -Wall -Wextra -Wno-unused-parameter -pedantic -O2 -g -std=c11
 LFLAGS	= -lkazmath -lglut -lGLEW -lGL -lm -lglfw -lassimp
+>>>>>>> mouse-camera
 
 SRCDIR	= src
 OBJDIR	= obj
@@ -16,6 +22,19 @@ DEPS		:= $(OBJECTS:$(OBJDIR)/%.o=$(DEPDIR)/%.d)
 
 REMOVE 	:= rm -f
 
+<<<<<<< HEAD
+REMOVE := rm -rf
+
+
+$(BINDIR)/$(TARGET): $(SRC_OBJECTS)
+	mkdir -p $(BINDIR)
+	$(CC) $(LFLAGS) -o $@ $(SRC_OBJECTS)
+	@echo "Linking complete"
+
+$(SRC_OBJECTS): $(OBJDIR)/%.o : $(SRCDIR)/%.c
+	mkdir -p $(OBJDIR)
+	$(CC) -c $(CFLAGS) $< -o $@
+=======
 
 $(BINDIR)/$(TARGET): $(OBJECTS)
 	$(LINKER) $(LFLAGS) -o $@ $(OBJECTS)
@@ -26,9 +45,14 @@ $(BINDIR)/$(TARGET): $(OBJECTS)
 $(OBJECTS): $(OBJDIR)/%.o : $(SRCDIR)/%.c
 	$(COMPILER) $(CFLAGS) $< -o $@
 	$(CC) -MM -MT '$(OBJDIR)/$*.o' $(SRCDIR)/$*.c > $(DEPDIR)/$*.d
+>>>>>>> mouse-camera
 	@echo "Compiled $<"
 
 .PHONY: clean
 clean:
+<<<<<<< HEAD
+	$(REMOVE) $(SRC_OBJECTS) $(OBJDIR) $(BINDIR)
+=======
 	$(REMOVE) $(OBJECTS)
+>>>>>>> mouse-camera
 	@echo "Deleted $<"
