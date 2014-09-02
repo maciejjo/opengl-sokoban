@@ -30,6 +30,7 @@ typedef struct mesh {
 mesh *mesh_create();
 int mesh_load_mesh(mesh *mesh);
 void mesh_load_shader(mesh *mesh, shader *shader);
+void mesh_load_texture();
 
 #endif
 

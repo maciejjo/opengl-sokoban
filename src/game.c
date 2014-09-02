@@ -23,9 +23,10 @@ level *level_create(const char *filename) {
 
     for(j = 0; j < lv->width; j++) {
 
+
       line_num++;
 
-      if(sscanf(line, "%d", &lv->map[i][j]) != 1)
+      if(fscanf(map_file, "%d", &lv->map[i][j]) != 1)
       fprintf(stderr, "Error in %s level file on line %d\n",
           filename, line_num);
 
