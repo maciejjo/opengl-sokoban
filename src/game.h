@@ -4,13 +4,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-typedef struct level {
-
-  int **map;
-  int width;
-  int height;
-
-} level;
+#include "level.h"
 
 typedef struct game {
 
@@ -21,6 +15,5 @@ typedef struct game {
 
 } game;
 
-level *level_create(const char *filename);
 
 #endif

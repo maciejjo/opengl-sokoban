@@ -3,7 +3,7 @@ CC			= clang
 COMPILER = $(CC) -c
 LINKER	= $(CC)
 CFLAGS	= -Wall -Wextra -Wno-unused-parameter -pedantic -O2 -g -std=c11
-LFLAGS	= -lkazmath -lglut -lGLEW -lGL -lm -lglfw -lassimp
+LFLAGS	= -lkazmath -lglut -lGLEW -lGL -lm -lglfw -lassimp -lSOIL
 
 SRCDIR	= src
 OBJDIR	= obj

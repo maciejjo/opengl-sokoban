@@ -1,8 +1,8 @@
 #include "mesh.h"
 
-struct mesh *mesh_create(char *fn) {
+struct mesh *mesh_create(const char *fn) {
 
-struct mesh *m = malloc(sizeof(struct mesh));
+mesh *m = (mesh *) malloc(sizeof(struct mesh));
 strcpy(m->filename, fn);
 return m;
 
@@ -29,7 +29,7 @@ int mesh_load_mesh(struct mesh *mesh) {
   GLfloat *texcoords = NULL;
 
 	if(mesh_ai->mVertices != NULL && mesh_ai->mNumVertices > 0) {
-    points = malloc (mesh->v_no * 3 * sizeof(GLfloat));
+    points = (GLfloat *) malloc (mesh->v_no * 3 * sizeof(GLfloat));
     for(unsigned int i = 0; i < mesh->v_no; i++) {
       const struct aiVector3D *vp = &(mesh_ai->mVertices[i]);
       points[i * 3] = (GLfloat) vp->x;
@@ -39,10 +39,9 @@ int mesh_load_mesh(struct mesh *mesh) {
   }
 
   if(mesh_ai->mNormals != NULL && mesh_ai->mNumVertices > 0) {
-    normals = malloc (mesh->v_no * 3 * sizeof(GLfloat));
+    normals = (GLfloat *) malloc (mesh->v_no * 3 * sizeof(GLfloat));
     for(unsigned int i = 0; i < mesh->v_no; i++) {
       const struct aiVector3D *vn = &(mesh_ai->mNormals[i]);
-      //printf("Loading %f, %f, %f\n", vn->x, vn->y, vn->z);
       normals[i * 3] = (GLfloat) vn->x;
       normals[i * 3 + 1] = (GLfloat) vn->y;
       normals[i * 3 + 2] = (GLfloat) vn->z;
@@ -50,11 +49,11 @@ int mesh_load_mesh(struct mesh *mesh) {
   }
 
   if(mesh_ai->mTextureCoords[0] != NULL && mesh_ai->mNumVertices > 0) {
-    texcoords = malloc (mesh->v_no * 3 * sizeof(GLfloat));
+    texcoords = (GLfloat *) malloc (mesh->v_no * 3 * sizeof(GLfloat));
     for(unsigned int i = 0; i < mesh->v_no; i++) {
       const struct aiVector3D *vt = &(mesh_ai->mTextureCoords[0][i]);
-      texcoords[i * 2] = (GLfloat) vt->x;
-      texcoords[i * 2 + 1] = (GLfloat) vt->y;
+      texcoords[i * 2] = -1 * (GLfloat) vt->x;
+      texcoords[i * 2 + 1] = -1 * (GLfloat) vt->y;
 
     }
   }
@@ -111,6 +110,31 @@ void mesh_load_shader(mesh *mesh, shader *shader) {
 
 }
 
-void mesh_load_texture() {
+void mesh_load_texture(mesh *m, const char *fn) {
+
+  printf("Loading texture...\n");
+
+  glBindVertexArray(m->vao);
+
+  GLuint tex;
+
+  glGenTextures(1, &tex);
+  
+  glBindTexture(GL_TEXTURE_2D, tex);
+  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+
+  int width, height;
+
+  unsigned char *img = SOIL_load_image(fn, &width, &height, 0, SOIL_LOAD_RGB);
+
+  glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, img);
+
+  SOIL_free_image_data(img);
+
+  printf("Texture loaded\n");
+
+
 
 }

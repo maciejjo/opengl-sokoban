@@ -27,10 +27,10 @@ typedef struct mesh {
 
 } mesh;
 
-mesh *mesh_create();
-int mesh_load_mesh(mesh *mesh);
+struct mesh *mesh_create(const char *fn);
+int mesh_load_mesh(mesh *m);
 void mesh_load_shader(mesh *mesh, shader *shader);
-void mesh_load_texture();
+void mesh_load_texture(mesh *m, const char *fn);
 
 #endif
 
