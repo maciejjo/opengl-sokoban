@@ -1,4 +1,5 @@
 #include "mesh.h"
+#include <libpng16/png.h>
 
 struct mesh *mesh_create(const char *fn) {
 
@@ -49,11 +50,12 @@ int mesh_load_mesh(struct mesh *mesh) {
   }
 
   if(mesh_ai->mTextureCoords[0] != NULL && mesh_ai->mNumVertices > 0) {
-    texcoords = (GLfloat *) malloc (mesh->v_no * 3 * sizeof(GLfloat));
+    texcoords = (GLfloat *) malloc (mesh->v_no * 2 * sizeof(GLfloat));
     for(unsigned int i = 0; i < mesh->v_no; i++) {
       const struct aiVector3D *vt = &(mesh_ai->mTextureCoords[0][i]);
-      texcoords[i * 2] = -1 * (GLfloat) vt->x;
-      texcoords[i * 2 + 1] = -1 * (GLfloat) vt->y;
+      texcoords[i * 2] = (GLfloat) vt->x;
+      texcoords[i * 2 + 1] = (GLfloat) vt->y;
+      printf("tex: %f, %f\n", vt->x, vt->y);
 
     }
   }
@@ -77,10 +79,10 @@ int mesh_load_mesh(struct mesh *mesh) {
     glGenBuffers(1, &vbo);
     //glGenBuffers(1, &mesh->vbo_norm);
     glBindBuffer(GL_ARRAY_BUFFER, vbo);
-    glBufferData(GL_ARRAY_BUFFER, 3 * mesh->v_no * sizeof(GLuint),
-        points, GL_STATIC_DRAW);
+    glBufferData(GL_ARRAY_BUFFER, 3 * mesh->v_no * sizeof(GLfloat),
+        normals, GL_STATIC_DRAW);
     GLint normAttrib = glGetAttribLocation(mesh->shader->id, "normal");
-    glVertexAttribPointer(normAttrib, 3, GL_FLOAT, GL_FALSE, 0, NULL);
+    glVertexAttribPointer(normAttrib, 3, GL_FLOAT, GL_FALSE, 0, 0);
     glEnableVertexAttribArray(normAttrib);
     free(normals);
   }
@@ -91,7 +93,8 @@ int mesh_load_mesh(struct mesh *mesh) {
     printf("Loading texcoords...\n");
     //glGenBuffers(1, &mesh->vbo_texcoord);
     glBindBuffer(GL_ARRAY_BUFFER, vbo);
-    glBufferData(GL_ARRAY_BUFFER, 2 * mesh->v_no, points, GL_STATIC_DRAW);
+    glBufferData(GL_ARRAY_BUFFER, 2 * mesh->v_no * sizeof(GLfloat),
+        texcoords, GL_STATIC_DRAW);
     GLint texcoordAttrib = glGetAttribLocation(mesh->shader->id, "texcoord");
     glVertexAttribPointer(texcoordAttrib, 2, GL_FLOAT, GL_FALSE, 0, 0);
     glEnableVertexAttribArray(texcoordAttrib);
@@ -114,27 +117,141 @@ void mesh_load_texture(mesh *m, const char *fn) {
 
   printf("Loading texture...\n");
 
-  glBindVertexArray(m->vao);
+  glGenTextures(1, &m->tex);
 
-  GLuint tex;
+  glBindTexture(GL_TEXTURE_2D, m->tex);
 
-  glGenTextures(1, &tex);
-  
-  glBindTexture(GL_TEXTURE_2D, tex);
-  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+}
 
-  int width, height;
+GLuint png_texture_load(mesh *m, const char * file_name, int * width, int * height)
+{
+    png_byte header[8];
 
-  unsigned char *img = SOIL_load_image(fn, &width, &height, 0, SOIL_LOAD_RGB);
+    FILE *fp = fopen(file_name, "rb");
+    if (fp == 0)
+    {
+        perror(file_name);
+        return 0;
+    }
 
-  glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, img);
+    // read the header
+    fread(header, 1, 8, fp);
 
-  SOIL_free_image_data(img);
+    if (png_sig_cmp(header, 0, 8))
+    {
+        fprintf(stderr, "error: %s is not a PNG.\n", file_name);
+        fclose(fp);
+        return 0;
+    }
 
-  printf("Texture loaded\n");
+    png_structp png_ptr = png_create_read_struct(PNG_LIBPNG_VER_STRING, NULL, NULL, NULL);
+    if (!png_ptr)
+    {
+        fprintf(stderr, "error: png_create_read_struct returned 0.\n");
+        fclose(fp);
+        return 0;
+    }
 
+    // create png info struct
+    png_infop info_ptr = png_create_info_struct(png_ptr);
+    if (!info_ptr)
+    {
+        fprintf(stderr, "error: png_create_info_struct returned 0.\n");
+        png_destroy_read_struct(&png_ptr, (png_infopp)NULL, (png_infopp)NULL);
+        fclose(fp);
+        return 0;
+    }
 
+    // create png info struct
+    png_infop end_info = png_create_info_struct(png_ptr);
+    if (!end_info)
+    {
+        fprintf(stderr, "error: png_create_info_struct returned 0.\n");
+        png_destroy_read_struct(&png_ptr, &info_ptr, (png_infopp) NULL);
+        fclose(fp);
+        return 0;
+    }
 
+    // the code in this if statement gets called if libpng encounters an error
+    if (setjmp(png_jmpbuf(png_ptr))) {
+        fprintf(stderr, "error from libpng\n");
+        png_destroy_read_struct(&png_ptr, &info_ptr, &end_info);
+        fclose(fp);
+        return 0;
+    }
+
+    // init png reading
+    png_init_io(png_ptr, fp);
+
+    // let libpng know you already read the first 8 bytes
+    png_set_sig_bytes(png_ptr, 8);
+
+    // read all the info up to the image data
+    png_read_info(png_ptr, info_ptr);
+
+    // variables to pass to get info
+    int bit_depth, color_type;
+    png_uint_32 temp_width, temp_height;
+
+    // get info about png
+    png_get_IHDR(png_ptr, info_ptr, &temp_width, &temp_height, &bit_depth, &color_type,
+        NULL, NULL, NULL);
+
+    if (width){ *width = temp_width; }
+    if (height){ *height = temp_height; }
+
+    // Update the png info struct.
+    png_read_update_info(png_ptr, info_ptr);
+
+    // Row size in bytes.
+    int rowbytes = png_get_rowbytes(png_ptr, info_ptr);
+
+    // glTexImage2d requires rows to be 4-byte aligned
+    rowbytes += 3 - ((rowbytes-1) % 4);
+
+    // Allocate the image_data as a big block, to be given to opengl
+    png_byte * image_data;
+    image_data = malloc(rowbytes * temp_height * sizeof(png_byte)+15);
+    if (image_data == NULL)
+    {
+        fprintf(stderr, "error: could not allocate memory for PNG image data\n");
+        png_destroy_read_struct(&png_ptr, &info_ptr, &end_info);
+        fclose(fp);
+        return 0;
+    }
+
+    // row_pointers is for pointing to image_data for reading the png with libpng
+    png_bytep * row_pointers = malloc(temp_height * sizeof(png_bytep));
+    if (row_pointers == NULL)
+    {
+        fprintf(stderr, "error: could not allocate memory for PNG row pointers\n");
+        png_destroy_read_struct(&png_ptr, &info_ptr, &end_info);
+        free(image_data);
+        fclose(fp);
+        return 0;
+    }
+
+    // set the individual row_pointers to point at the correct offsets of image_data
+    int i;
+    for (i = 0; i < temp_height; i++)
+    {
+        row_pointers[temp_height - 1 - i] = image_data + i * rowbytes;
+    }
+
+    // read the png into image_data through row_pointers
+    png_read_image(png_ptr, row_pointers);
+
+    // Generate the OpenGL texture object
+    glGenTextures(1, &m->tex);
+    glBindTexture(GL_TEXTURE_2D, m->tex);
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, temp_width, temp_height, 0, GL_RGB, GL_UNSIGNED_BYTE, image_data);
+    glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+    glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+
+    // clean up
+    png_destroy_read_struct(&png_ptr, &info_ptr, &end_info);
+    free(image_data);
+    free(row_pointers);
+    fclose(fp);
+    return 0;
 }

@@ -154,12 +154,24 @@ int main()
   mesh *block = (mesh *) mesh_create("mesh/box_uv.obj");
   mesh_load_shader(block, s);
   mesh_load_mesh(block);
-  mesh_load_texture(block, "metal.png");
+  //mesh_load_texture(block, "texture.png");
+  png_texture_load(block, "papryka.png", NULL, NULL);
+
+  mesh *crate  = (mesh *) mesh_create("mesh/box_uv.obj");
+  mesh_load_shader(crate, s);
+  mesh_load_mesh(crate);
+  //mesh_load_texture(block, "texture.png");
+  png_texture_load(crate, "texture.png", NULL, NULL);
 
   mesh *ball = (mesh *) mesh_create("mesh/sphere_uv.obj");
   mesh_load_shader(ball, s);
   mesh_load_mesh(ball);
-  mesh_load_texture(ball, "texture.png");
+  png_texture_load(ball, "texture.png", NULL, NULL);
+
+  mesh *slot = (mesh *) mesh_create("mesh/box_uv.obj");
+  mesh_load_shader(slot, s);
+  mesh_load_mesh(slot);
+  png_texture_load(slot, "epoznan.png", NULL, NULL);
 
 
   double x,y;
@@ -213,22 +225,45 @@ int main()
     GLint uniCam = glGetUniformLocation(s->id, "cam_pos");
     glUniform3f(uniCam, p_eye.x, p_eye.y, p_eye.z);
 
+    glBindVertexArray(ball->vao);
+    glBindTexture(GL_TEXTURE_2D, ball->tex);
+    kmMat4 model;
+    GLint uniModel = glGetUniformLocation(s->id, "model");
+    kmMat4Translation(&model, trans*pl->coords.x, 0, trans*pl->coords.y);
+    glUniformMatrix4fv(uniModel, 1, GL_FALSE, &model.mat[0]);
+    glDrawArrays(GL_TRIANGLES, 0, ball->v_no);
+
     for(int i = 0; i < lv->size.y; i++) {
       for(int j = 0; j < lv->size.x; j++) {
 
+        if(lv->map[j][i] == 4) {
 
-        glBindVertexArray(block->vao);
-        kmMat4 model;
-        kmMat4Identity(&model);
-        kmMat4Translation(&model, trans*i, -trans, trans*j);
-        GLint uniModel = glGetUniformLocation(s->id, "model");
-        glUniformMatrix4fv(uniModel, 1, GL_FALSE, &model.mat[0]);
-        glDrawArrays(GL_TRIANGLES, 0, block->v_no);
+          glBindVertexArray(slot->vao);
+          glBindTexture(GL_TEXTURE_2D, slot->tex);
+          kmMat4 model;
+          kmMat4Identity(&model);
+          kmMat4Translation(&model, trans*i, -trans, trans*j);
+          GLint uniModel = glGetUniformLocation(s->id, "model");
+          glUniformMatrix4fv(uniModel, 1, GL_FALSE, &model.mat[0]);
+          glDrawArrays(GL_TRIANGLES, 0, slot->v_no);
 
+        } else {
+
+          glBindVertexArray(block->vao);
+          glBindTexture(GL_TEXTURE_2D, block->tex);
+          kmMat4 model;
+          kmMat4Identity(&model);
+          kmMat4Translation(&model, trans*i, -trans, trans*j);
+          GLint uniModel = glGetUniformLocation(s->id, "model");
+          glUniformMatrix4fv(uniModel, 1, GL_FALSE, &model.mat[0]);
+          glDrawArrays(GL_TRIANGLES, 0, block->v_no);
+
+        }
 
         if(lv->map[j][i] == 1) {
 
           glBindVertexArray(block->vao);
+          glBindTexture(GL_TEXTURE_2D, block->tex);
           kmMat4 model;
           kmMat4Identity(&model);
           kmMat4Translation(&model, trans*i, 0, trans*j);
@@ -238,17 +273,23 @@ int main()
 
         }
 
+        if(lv->map[j][i] == 3) {
+
+          glBindVertexArray(crate->vao);
+          glBindTexture(GL_TEXTURE_2D, crate->tex);
+          kmMat4 model;
+          kmMat4Identity(&model);
+          kmMat4Translation(&model, trans*i, 0, trans*j);
+          GLint uniModel = glGetUniformLocation(s->id, "model");
+          glUniformMatrix4fv(uniModel, 1, GL_FALSE, &model.mat[0]);
+          glDrawArrays(GL_TRIANGLES, 0, crate->v_no);
+
+        }
+
 
       }
     }
 
-
-    glBindVertexArray(ball->vao);
-    kmMat4 model;
-    GLint uniModel = glGetUniformLocation(s->id, "model");
-    kmMat4Translation(&model, trans*pl->coords.x, 0, trans*pl->coords.y);
-    glUniformMatrix4fv(uniModel, 1, GL_FALSE, &model.mat[0]);
-    glDrawArrays(GL_TRIANGLES, 0, ball->v_no);
 
     glfwSwapBuffers(window);
 
