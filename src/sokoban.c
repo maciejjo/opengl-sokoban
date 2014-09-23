@@ -178,6 +178,11 @@ int main()
   mesh_load_mesh(slot);
   png_texture_load(slot, "tex/carpet.png", NULL, NULL);
 
+  mesh *floor = (mesh *) mesh_create("mesh/box_uv.obj");
+  mesh_load_shader(floor, s);
+  mesh_load_mesh(floor);
+  png_texture_load(floor, "tex/stone.png", NULL, NULL);
+
 
   double x,y;
   double p_x, p_y;
@@ -254,14 +259,14 @@ int main()
 
         } else {
 
-          glBindVertexArray(block->vao);
-          glBindTexture(GL_TEXTURE_2D, block->tex);
+          glBindVertexArray(floor->vao);
+          glBindTexture(GL_TEXTURE_2D, floor->tex);
           kmMat4 model;
           kmMat4Identity(&model);
           kmMat4Translation(&model, trans*i, -trans, trans*j);
           GLint uniModel = glGetUniformLocation(s->id, "model");
           glUniformMatrix4fv(uniModel, 1, GL_FALSE, &model.mat[0]);
-          glDrawArrays(GL_TRIANGLES, 0, block->v_no);
+          glDrawArrays(GL_TRIANGLES, 0, floor->v_no);
 
         }
 
