@@ -130,7 +130,7 @@ int main()
   shader_program_create(s);
   glUseProgram(s->id);
 
-  level *lv = level_create("lvl/lvl2");
+  level *lv = level_create("lvl/lvl3");
   pl = player_create(lv);
   current_level = lv;
 
@@ -278,7 +278,7 @@ int main()
 
         }
 
-        if(lv->map[j][i] == 3) {
+        if(lv->map[j][i] == 3 || lv->map[j][i] == 5) {
 
           glBindVertexArray(crate->vao);
           glBindTexture(GL_TEXTURE_2D, crate->tex);
