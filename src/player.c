@@ -42,7 +42,7 @@ int move(player *p, 	/* struktura plyera z informacja o obecnej pozycji playera 
 
 	printf("Moja pozycja teraz %d,%d \t Moja pozycja po ruchu %d,%d \n",
 		p->coords.y,p->coords.x,p->coords.y+y,p->coords.x+x);
-	if(0==lv->map[Y+y][X+x]){
+	if(0==lv->map[Y+y][X+x] || 2==lv->map[Y+y][X+x]){
 		lv->map[Y][X]=0;
 		p->coords.x+=x;
 		p->coords.y+=y;
@@ -51,59 +51,66 @@ int move(player *p, 	/* struktura plyera z informacja o obecnej pozycji playera 
 		printf("Wall \n");
 	}else if( 3==lv->map[Y+y][X+x]){
 		if(1 == y){
-			if(0==lv->map[Y+y+1][X+x]){
+			if(0==lv->map[Y+y+1][X+x]|| 2==lv->map[Y+y+1][X+x]){
 				lv->map[Y+y+1][X+x]=3;
 				lv->map[Y+y][X+x]=2;
 				lv->map[Y][X]=0;
 				p->coords.x+=x;
 				p->coords.y+=y;
 			}else if( 4 == lv->map[Y+y+1][X+x]){
+				lv->map[Y+y+1][X]=5;
 				lv->map[Y+y][X+x]=2;
 				lv->map[Y][X]=0;
 				p->coords.x+=x;
 				p->coords.y+=y;			
 			}else printf("Nothing to do\n");
 		}else if( -1 == y){
-			if(0==lv->map[Y+y-1][X+x]){
+			if(0==lv->map[Y+y-1][X+x] || 2==lv->map[Y+y-1][X+x]){
 				lv->map[Y+y-1][X+x]=3;
 				lv->map[Y+y][X+x]=2;
 				lv->map[Y][X]=0;
 				p->coords.x+=x;
 				p->coords.y+=y;	
 			}else if( 4 == lv->map[Y+y-1][X+x]){
+				lv->map[Y+y-1][X+x]=5;
 				lv->map[Y+y][X+x]=2;
 				lv->map[Y][X]=0;
 				p->coords.x+=x;
 				p->coords.y+=y;
 			}else printf("Nothing to do\n");
 		}else if( 1 == x){
-			if(0==lv->map[Y+y][X+x+1]){
+			if(0==lv->map[Y+y][X+x+1] || 2==lv->map[Y+y][X+x+1]){
 				lv->map[Y+y][X+x+1]=3;
 				lv->map[Y+y][X+x]=2;
 				lv->map[Y][X]=0;
 				p->coords.x+=x;
 				p->coords.y+=y;
 			}else if( 4 == lv->map[Y+y][X+x+1]){
+				lv->map[Y+y][X+x]=5;
 				lv->map[Y+y][X+x]=2;
 				lv->map[Y][X]=0;
 				p->coords.x+=x;
 				p->coords.y+=y;
 			}else printf("Nothing to do\n");
 		}else if( -1 == x){
-			if(0==lv->map[Y+y][X+x-1]){
+			if(0==lv->map[Y+y][X+x-1] || 2==lv->map[Y+y][X+x-1]){
 				lv->map[Y+y][X+x-1]=3;
 				lv->map[Y+y][X+x]=2;
 				lv->map[Y][X]=0;
 				p->coords.x+=x;
 				p->coords.y+=y;
 			}else if( 4 == lv->map[Y+y][X+x-1]){
+				lv->map[Y+y][X+x-1]=5;
 				lv->map[Y+y][X+x]=2;
 				lv->map[Y][X]=0;
 				p->coords.x+=x;
 				p->coords.y+=y;
 			}else printf("Nothing to do\n");
 		}
+	}else if( 5 == lv->map[Y+y][X+x]){
+		printf("Box on slot \n");
 	}
+
 	for(i = 0; i < lv->size.y; i++) {
     		for(j = 0; j < lv->size.x; j++)
      			 printf("%d%d %d\t", i, j, lv->map[i][j]);

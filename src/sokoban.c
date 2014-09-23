@@ -49,7 +49,7 @@ void key_callback(GLFWwindow* window, int key, int scancode, int action, int mod
   {
 
       case GLFW_KEY_ESCAPE:
-
+	
           glfwSetWindowShouldClose(window, GL_TRUE);
           break;
 
@@ -137,6 +137,7 @@ int main()
   float trans = 2.0f;
   float mid_x = (lv->size.x -1) * trans  / 2;
   float mid_y = (lv->size.y -1 ) * trans  / 2;
+
 
   kmMat4 proj;
 
