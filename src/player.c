@@ -86,7 +86,7 @@ int move(player *p, 	/* struktura plyera z informacja o obecnej pozycji playera 
 				p->coords.x+=x;
 				p->coords.y+=y;
 			}else if( 4 == lv->map[Y+y][X+x+1]){
-				lv->map[Y+y][X+x]=5;
+				lv->map[Y+y][X+x+1]=5;
 				lv->map[Y+y][X+x]=2;
 				lv->map[Y][X]=0;
 				p->coords.x+=x;
