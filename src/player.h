@@ -12,6 +12,7 @@ typedef struct player {
 
 player *player_create(level *lv);
 
+int move(player *p,level *lv,int x,int y);
 char can_move(player *p, level *lv, int dir);
 
 

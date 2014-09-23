@@ -53,30 +53,35 @@ void key_callback(GLFWwindow* window, int key, int scancode, int action, int mod
           glfwSetWindowShouldClose(window, GL_TRUE);
           break;
 
-      case GLFW_KEY_LEFT:
-
+      case GLFW_KEY_LEFT:move(pl,current_level,1,0);
+/*
           if(can_move(pl, current_level, LEFT) == 1)
             pl->coords.x++;
-
+*/
           break;
 
-      case GLFW_KEY_RIGHT:
-
+      case GLFW_KEY_RIGHT:move(pl,current_level,-1,0);
+/*
           if(can_move(pl, current_level, RIGHT) == 1)
             pl->coords.x--;
-          break;
+*/
+	    break;
 
-      case GLFW_KEY_UP:
+      case GLFW_KEY_UP:move(pl,current_level,0,1);
 
+/*
           if(can_move(pl, current_level, FORWARD) == 1)
             pl->coords.y++;
-          break;
+*/
+	    break;
 
-      case GLFW_KEY_DOWN:
+      case GLFW_KEY_DOWN:move(pl,current_level,0,-1);
 
+/*
           if(can_move(pl, current_level, BACKWARD) == 1)
             pl->coords.y--;
-          break;
+*/
+ 	    break;
 
       default:
 
