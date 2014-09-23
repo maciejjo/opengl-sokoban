@@ -33,15 +33,13 @@ int move(player *p, 	/* struktura plyera z informacja o obecnej pozycji playera 
 	) 
 {
 	int i,j;	
-  	for(i = 0; i < lv->size.y; i++) {
+	for(i = 0; i < lv->size.y; i++) {
     		for(j = 0; j < lv->size.x; j++)
      			 printf("%d%d %d\t", i, j, lv->map[i][j]);
     	printf("\n");
   	}
 
-	//lv->map[X+x][Y+y]=2;
-	//p->coords.x +=x;
-	//p->coords.y +=y;
+
 	printf("Moja pozycja teraz %d,%d \t Moja pozycja po ruchu %d,%d \n",
 		p->coords.y,p->coords.x,p->coords.y+y,p->coords.x+x);
 	if(0==lv->map[Y+y][X+x]){
@@ -72,7 +70,7 @@ int move(player *p, 	/* struktura plyera z informacja o obecnej pozycji playera 
 				lv->map[Y][X]=0;
 				p->coords.x+=x;
 				p->coords.y+=y;	
-			}else if( 4 == lv->map[Y+y+1][X+x]){
+			}else if( 4 == lv->map[Y+y-1][X+x]){
 				lv->map[Y+y][X+x]=2;
 				lv->map[Y][X]=0;
 				p->coords.x+=x;
@@ -106,7 +104,13 @@ int move(player *p, 	/* struktura plyera z informacja o obecnej pozycji playera 
 			}else printf("Nothing to do\n");
 		}
 	}
-	return 1; 
+	for(i = 0; i < lv->size.y; i++) {
+    		for(j = 0; j < lv->size.x; j++)
+     			 printf("%d%d %d\t", i, j, lv->map[i][j]);
+    	printf("\n");
+  	}
+
+return 1; 
 }
 
 char can_move(player *p, level *lv, int dir)
