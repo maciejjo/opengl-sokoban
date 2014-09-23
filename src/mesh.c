@@ -1,5 +1,5 @@
 #include "mesh.h"
-#include <libpng12/png.h>
+#include <png.h>
 
 struct mesh *mesh_create(const char *fn) {
 
