@@ -160,23 +160,23 @@ int main()
   mesh_load_shader(block, s);
   mesh_load_mesh(block);
   //mesh_load_texture(block, "texture.png");
-  png_texture_load(block, "papryka.png", NULL, NULL);
+  png_texture_load(block, "tex/stone3.png", NULL, NULL);
 
   mesh *crate  = (mesh *) mesh_create("mesh/box_uv.obj");
   mesh_load_shader(crate, s);
   mesh_load_mesh(crate);
   //mesh_load_texture(block, "texture.png");
-  png_texture_load(crate, "texture.png", NULL, NULL);
+  png_texture_load(crate, "tex/wood2.png", NULL, NULL);
 
   mesh *ball = (mesh *) mesh_create("mesh/sphere_uv.obj");
   mesh_load_shader(ball, s);
   mesh_load_mesh(ball);
-  png_texture_load(ball, "texture.png", NULL, NULL);
+  png_texture_load(ball, "tex/wood.png", NULL, NULL);
 
   mesh *slot = (mesh *) mesh_create("mesh/box_uv.obj");
   mesh_load_shader(slot, s);
   mesh_load_mesh(slot);
-  png_texture_load(slot, "epoznan.png", NULL, NULL);
+  png_texture_load(slot, "tex/carpet.png", NULL, NULL);
 
 
   double x,y;
